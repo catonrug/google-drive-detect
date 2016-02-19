@@ -222,10 +222,10 @@ fi
 name=$(echo "Google Drive")
 
 #set url
-url=$(echo "https://dl.google.com/drive/gsync_enterprise.msi")
+enterpriseurl=$(echo "https://dl.google.com/drive/gsync_enterprise.msi")
 
 #get all info about url
-wget -S --spider -o $tmp/output.log $url
+wget -S --spider -o $tmp/output.log $enterpriseurl
 
 grep -A99 "^Resolving" $tmp/output.log | grep "HTTP.*200 OK"
 if [ $? -eq 0 ]; then
@@ -240,22 +240,22 @@ if [ $? -eq 0 ]; then
 #if there is such thing as Last-Modified
 
 #cut out last modified
-lastmodified=$(grep -A99 "^Resolving" $tmp/output.log | grep "Last-Modified" | sed "s/^.*: //")
+enterpriselastmodified=$(grep -A99 "^Resolving" $tmp/output.log | grep "Last-Modified" | sed "s/^.*: //")
 
-filename=$(echo $url | sed "s/^.*\///g")
+enterprisefilename=$(echo $url | sed "s/^.*\///g")
 
-grep "$filename $lastmodified" $db > /dev/null
+grep "$enterprisefilename $enterpriselastmodified" $db > /dev/null
 if [ $? -ne 0 ]; then
 
 echo new version detected!
 echo
 
-echo Downloading $filename
-wget $url -O $tmp/$filename -q
+echo Downloading $enterprisefilename
+wget $enterpriseurl -O $tmp/$enterprisefilename -q
 echo
 
 echo extracting installer..
-7z x $tmp/$filename -y -o$tmp > /dev/null
+7z x $tmp/$enterprisefilename -y -o$tmp > /dev/null
 echo
 
 echo searching exact version number
@@ -265,12 +265,16 @@ echo $version | grep "^[0-9]\+[\., ]\+[0-9]\+[\., ]\+[0-9]\+[\., ]\+[0-9]\+"
 if [ $? -eq 0 ]; then
 echo
 
-#delete all temp
-rm $tmp/* -rf
+echo creating md5 checksum of file..
+enterprisemd5=$(md5sum $tmp/$enterprisefilename | sed "s/\s.*//g")
+echo
+
+echo creating sha1 checksum of file..
+enterprisesha1=$(sha1sum $tmp/$enterprisefilename | sed "s/\s.*//g")
+echo
 
 #this version should contain direct link to it
 url=$(echo "https://dl.google.com/drive/$version/gsync.msi")
-
 
 #get all info about url
 wget -S --spider -o $tmp/output.log $url
@@ -309,6 +313,10 @@ sha1=$(sha1sum $tmp/$filename | sed "s/\s.*//g")
 echo
 
 #lets put all signs about this file into the database
+echo "$enterprisefilename $enterpriselastmodified">> $db
+echo "$enterprisemd5">> $db
+echo "$enterprisesha1">> $db
+echo >> $db
 echo "$filename $lastmodified">> $db
 echo "$md5">> $db
 echo "$sha1">> $db
@@ -316,7 +324,7 @@ echo >> $db
 
 #create unique filename for google upload
 newfilename=$(echo $filename | sed "s/\.msi/_`echo $version`\.msi/")
-mv $tmp/$filename $tmp/$newfilename
+mv $tmp/$enterprisefilename $tmp/$newfilename
 
 #if google drive config exists then upload and delete file:
 if [ -f "../gd/$appname.cfg" ]
@@ -394,7 +402,7 @@ fi
 
 else
 #if file already in database
-echo $filename already in database						
+echo $enterprisefilename already in database						
 fi
 
 else
@@ -404,7 +412,7 @@ emails=$(cat ../maintenance | sed '$aend of file')
 printf %s "$emails" | while IFS= read -r onemail
 do {
 python ../send-email.py "$onemail" "To Do List" "Last-Modified field is missing from output.log: 
-$url"
+$enterpriseurl "
 } done
 echo 
 echo
@@ -417,7 +425,7 @@ emails=$(cat ../maintenance | sed '$aend of file')
 printf %s "$emails" | while IFS= read -r onemail
 do {
 python ../send-email.py "$onemail" "To Do List" "Content-Length field is missing from output.log: 
-$url"
+$enterpriseurl "
 } done
 echo 
 echo
@@ -430,7 +438,7 @@ emails=$(cat ../maintenance | sed '$aend of file')
 printf %s "$emails" | while IFS= read -r onemail
 do {
 python ../send-email.py "$onemail" "To Do List" "the following link do not retrieve good http status code: 
-$url"
+$enterpriseurl "
 } done
 echo 
 echo
