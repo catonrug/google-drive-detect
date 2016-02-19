@@ -314,10 +314,13 @@ echo
 
 #lets put all signs about this file into the database
 echo "$enterprisefilename $enterpriselastmodified">> $db
+echo "$version">> $db
 echo "$enterprisemd5">> $db
 echo "$enterprisesha1">> $db
 echo >> $db
 echo "$filename $lastmodified">> $db
+echo "$url">> $db
+echo "$version">> $db
 echo "$md5">> $db
 echo "$sha1">> $db
 echo >> $db
