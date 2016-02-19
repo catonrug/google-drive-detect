@@ -242,7 +242,7 @@ if [ $? -eq 0 ]; then
 #cut out last modified
 enterpriselastmodified=$(grep -A99 "^Resolving" $tmp/output.log | grep "Last-Modified" | sed "s/^.*: //")
 
-enterprisefilename=$(echo $url | sed "s/^.*\///g")
+enterprisefilename=$(echo $enterpriseurl | sed "s/^.*\///g")
 
 grep "$enterprisefilename $enterpriselastmodified" $db > /dev/null
 if [ $? -ne 0 ]; then
