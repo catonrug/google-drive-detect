@@ -237,7 +237,7 @@ if [ $? -eq 0 ]; then
 
 grep -A99 "^Resolving" $tmp/output.log | grep "Last-Modified" 
 if [ $? -eq 0 ]; then
-#if there is such thing as Content-Length
+#if there is such thing as Last-Modified
 
 #cut out last modified
 lastmodified=$(grep -A99 "^Resolving" $tmp/output.log | grep "Last-Modified" | sed "s/^.*: //")
@@ -254,6 +254,44 @@ echo Downloading $filename
 wget $url -O $tmp/$filename -q
 echo
 
+echo extracting installer..
+7z x $tmp/$filename -y -o$tmp > /dev/null
+echo
+
+echo searching exact version number
+version=$(pestr $tmp/googledrivesync.exe | grep -m1 -A1 "ProductVersion" | grep -v "ProductVersion")
+
+echo $version | grep "^[0-9]\+[\., ]\+[0-9]\+[\., ]\+[0-9]\+[\., ]\+[0-9]\+"
+if [ $? -eq 0 ]; then
+echo
+
+rm $tmp/* -rf
+
+url=$(echo "https://dl.google.com/drive/$version/gsync.msi")
+
+#get all info about url
+wget -S --spider -o $tmp/output.log $url
+
+grep -A99 "^Resolving" $tmp/output.log | grep "HTTP.*200 OK"
+if [ $? -eq 0 ]; then
+#if file request retrieve http code 200 this means OK
+
+grep -A99 "^Resolving" $tmp/output.log | grep "Content-Length" 
+if [ $? -eq 0 ]; then
+#if there is such thing as Content-Length
+
+grep -A99 "^Resolving" $tmp/output.log | grep "Last-Modified" 
+if [ $? -eq 0 ]; then
+#if there is such thing as Last-Modified
+
+#cut out last modified
+lastmodified=$(grep -A99 "^Resolving" $tmp/output.log | grep "Last-Modified" | sed "s/^.*: //")
+
+filename=$(echo $url | sed "s/^.*\///g")
+
+grep "$filename $lastmodified" $db > /dev/null
+if [ $? -ne 0 ]; then
+
 echo creating md5 checksum of file..
 md5=$(md5sum $tmp/$filename | sed "s/\s.*//g")
 echo
@@ -267,17 +305,6 @@ echo "$filename $lastmodified">> $db
 echo "$md5">> $db
 echo "$sha1">> $db
 echo >> $db
-
-echo extracting installer..
-7z x $tmp/$filename -y -o$tmp > /dev/null
-echo
-
-echo searching exact version number
-version=$(pestr $tmp/googledrivesync.exe | grep -m1 -A1 "ProductVersion" | grep -v "ProductVersion")
-
-echo $version | grep "^[0-9]\+[\., ]\+[0-9]\+[\., ]\+[0-9]\+[\., ]\+[0-9]\+"
-if [ $? -eq 0 ]; then
-echo
 
 #create unique filename for google upload
 newfilename=$(echo $filename | sed "s/\.msi/_`echo $version`\.msi/")
@@ -303,6 +330,50 @@ $sha1"
 echo
 
 else
+#if file already in database
+echo $filename already in database						
+fi
+
+else
+#if link do not include Last-Modified
+echo Last-Modified field is missing from output.log
+emails=$(cat ../maintenance | sed '$aend of file')
+printf %s "$emails" | while IFS= read -r onemail
+do {
+python ../send-email.py "$onemail" "To Do List" "Last-Modified field is missing from output.log: 
+$url"
+} done
+echo 
+echo
+fi
+
+else
+#if link do not include Content-Length
+echo Content-Length field is missing from output.log
+emails=$(cat ../maintenance | sed '$aend of file')
+printf %s "$emails" | while IFS= read -r onemail
+do {
+python ../send-email.py "$onemail" "To Do List" "Content-Length field is missing from output.log: 
+$url"
+} done
+echo 
+echo
+fi
+
+else
+#if http statis code is not 200 ok
+echo Did not receive good http status code
+emails=$(cat ../maintenance | sed '$aend of file')
+printf %s "$emails" | while IFS= read -r onemail
+do {
+python ../send-email.py "$onemail" "To Do List" "the following link do not retrieve good http status code: 
+$url "
+} done
+echo 
+echo
+fi
+
+else
 #version do not match version pattern
 echo version do not match version pattern
 emails=$(cat ../maintenance | sed '$aend of file')
@@ -315,7 +386,7 @@ fi
 
 else
 #if file already in database
-echo file already in database						
+echo $filename already in database						
 fi
 
 else
