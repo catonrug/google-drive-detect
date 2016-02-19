@@ -265,9 +265,12 @@ echo $version | grep "^[0-9]\+[\., ]\+[0-9]\+[\., ]\+[0-9]\+[\., ]\+[0-9]\+"
 if [ $? -eq 0 ]; then
 echo
 
+#delete all temp
 rm $tmp/* -rf
 
+#this version should contain direct link to it
 url=$(echo "https://dl.google.com/drive/$version/gsync.msi")
+
 
 #get all info about url
 wget -S --spider -o $tmp/output.log $url
@@ -287,10 +290,15 @@ if [ $? -eq 0 ]; then
 #cut out last modified
 lastmodified=$(grep -A99 "^Resolving" $tmp/output.log | grep "Last-Modified" | sed "s/^.*: //")
 
+#set filename
 filename=$(echo $url | sed "s/^.*\///g")
 
 grep "$filename $lastmodified" $db > /dev/null
 if [ $? -ne 0 ]; then
+
+echo Downloading $filename
+wget $url -O $tmp/$filename -q
+echo
 
 echo creating md5 checksum of file..
 md5=$(md5sum $tmp/$filename | sed "s/\s.*//g")
