@@ -323,7 +323,7 @@ echo "$sha1">> $db
 echo >> $db
 
 #create unique filename for google upload
-newfilename=$(echo $filename | sed "s/\.msi/_`echo $version`\.msi/")
+newfilename=$(echo $enterprisefilename | sed "s/\.msi/_`echo $version`\.msi/")
 mv $tmp/$enterprisefilename $tmp/$newfilename
 
 #if google drive config exists then upload and delete file:
@@ -339,11 +339,17 @@ fi
 emails=$(cat ../posting | sed '$aend of file')
 printf %s "$emails" | while IFS= read -r onemail
 do {
-python ../send-email.py "$onemail" "$name $version" "$url 
+python ../send-email.py "$onemail" "$name $version msi" "$url 
 $md5
-$sha1"
+$sha1
+
+https://2e6b3d70b345cdbc4db6289569c3331791ee1634.googledrive.com/host/0B_3uBwg3RcdVQVN1WFIxX09xd2M/$enterprisefilename 
+$enterprisemd5
+$enterprisesha1"
 } done
 echo
+
+
 
 else
 #if file already in database
