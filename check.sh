@@ -206,7 +206,7 @@ echo Last-Modified field is missing from output.log
 emails=$(cat ../maintenance | sed '$aend of file')
 printf %s "$emails" | while IFS= read -r onemail
 do {
-python ../send-email.py "$onemail" "To Do List" "Last-Modified field is missing from output.log: 
+python ../send-email.py "$onemail" "$name" "Last-Modified field is missing from output.log: 
 $url"
 } done
 echo 
@@ -219,7 +219,7 @@ echo Content-Length field is missing from output.log
 emails=$(cat ../maintenance | sed '$aend of file')
 printf %s "$emails" | while IFS= read -r onemail
 do {
-python ../send-email.py "$onemail" "To Do List" "Content-Length field is missing from output.log: 
+python ../send-email.py "$onemail" "$name" "Content-Length field is missing from output.log: 
 $url"
 } done
 echo 
@@ -232,8 +232,7 @@ echo Did not receive good http status code
 emails=$(cat ../maintenance | sed '$aend of file')
 printf %s "$emails" | while IFS= read -r onemail
 do {
-python ../send-email.py "$onemail" "To Do List" "the following link do not retrieve good http status code: 
-$url "
+echo python ../send-email.py "$onemail" "$name" "the following link do not retrieve good http status code: $url "
 } done
 echo 
 echo
@@ -245,7 +244,7 @@ echo version do not match version pattern
 emails=$(cat ../maintenance | sed '$aend of file')
 printf %s "$emails" | while IFS= read -r onemail
 do {
-python ../send-email.py "$onemail" "To Do List" "Version do not match version pattern: 
+python ../send-email.py "$onemail" "$name" "Version do not match version pattern: 
 $url "
 } done
 fi
@@ -261,7 +260,7 @@ echo Last-Modified field is missing from output.log
 emails=$(cat ../maintenance | sed '$aend of file')
 printf %s "$emails" | while IFS= read -r onemail
 do {
-python ../send-email.py "$onemail" "To Do List" "Last-Modified field is missing from output.log: 
+python ../send-email.py "$onemail" "$name" "Last-Modified field is missing from output.log: 
 $enterpriseurl "
 } done
 echo 
@@ -274,7 +273,7 @@ echo Content-Length field is missing from output.log
 emails=$(cat ../maintenance | sed '$aend of file')
 printf %s "$emails" | while IFS= read -r onemail
 do {
-python ../send-email.py "$onemail" "To Do List" "Content-Length field is missing from output.log: 
+python ../send-email.py "$onemail" "$name" "Content-Length field is missing from output.log: 
 $enterpriseurl "
 } done
 echo 
@@ -287,7 +286,7 @@ echo Did not receive good http status code
 emails=$(cat ../maintenance | sed '$aend of file')
 printf %s "$emails" | while IFS= read -r onemail
 do {
-python ../send-email.py "$onemail" "To Do List" "the following link do not retrieve good http status code: 
+python ../send-email.py "$onemail" "$name" "the following link do not retrieve good http status code: 
 $enterpriseurl "
 } done
 echo 
