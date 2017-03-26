@@ -187,9 +187,10 @@ python ../send-email.py "$onemail" "$name $version msi" "$url
 $md5
 $sha1
 
-https://2e6b3d70b345cdbc4db6289569c3331791ee1634.googledrive.com/host/0B_3uBwg3RcdVQVN1WFIxX09xd2M/$newfilename 
+$newfilename 
 $enterprisemd5
-$enterprisesha1"
+$enterprisesha1
+https://drive.google.com/drive/folders/0B_3uBwg3RcdVcGx0aVlzT0U1NVU "
 } done
 echo
 
